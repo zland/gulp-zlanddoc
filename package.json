@@ -28,5 +28,9 @@
     "mocha": "^2.3.2",
     "proxyquire": "^1.7.2",
     "vinyl": "^0.5.3"
+  },
+  "repository": { 
+    "type" : "git", 
+    "url" : "https://github.com/zland/gulp-zlanddoc.git"
   }
 }
