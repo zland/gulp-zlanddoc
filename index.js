@@ -88,8 +88,22 @@ function createDescriptionContent(directoryDescriptions, fileDescriptions) {
   return content;
 }
 
-// Plugin level function(dealing with files)
-function zlanddoc() {
+/**
+ * zlanddoc gulp plugin
+ * @param  {Object} options
+ *   {
+ *     fileExtensions: Array
+ *   }
+ * @return {Stream}
+ */
+function zlanddoc(options) {
+
+  options = options || {};
+  var fileExtensions = options.fileExtensions || ['.js', '.jsx'];
+  var fileExtensionObjects = {};
+  fileExtensions.forEach(function(ext) {
+    fileExtensionObjects[ext] = true;
+  });
 
   // Creating a stream through which each file will pass
   return through.obj(function(file, enc, cb) {
@@ -115,7 +129,7 @@ function zlanddoc() {
     });
 
     var jsFiles = files.filter(function(file) {
-      return path.extname(file) === '.js';
+      return path.extname(file) in fileExtensionObjects;
     });
 
     var fileDescriptions = jsFiles.map(function(file) {
@@ -127,7 +141,7 @@ function zlanddoc() {
     });
 
     var fileContent = filterGeneratedContent(file.contents.toString());
-    if (fileContent.charAt(fileContent.length) !== "\n") {
+    if (fileContent.charAt(fileContent.length - 1) !== "\n") {
       fileContent+= "\n";
     }
     fileContent+= createDescriptionContent(directoryDescriptions, fileDescriptions);
