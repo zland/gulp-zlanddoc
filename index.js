@@ -69,8 +69,14 @@ function filterGeneratedContent(string) {
 
 function createDescriptions(descriptions) {
   return descriptions.map(function(description) {
-    return '### [' + description.text + '](' + description.link + ')' + "  \n"
-            + description.description;
+    return '### ' +
+      (
+        description.link !== null
+        ? '[' + description.text + '](' + description.link + ')'
+        : description.text
+      ) +
+      "  \n" +
+      description.description;
   });
 }
 
@@ -104,6 +110,7 @@ function zlanddoc(options) {
   fileExtensions.forEach(function(ext) {
     fileExtensionObjects[ext] = true;
   });
+  var buildFileDescriptions = options.buildFileDescriptions || false;
 
   // Creating a stream through which each file will pass
   return through.obj(function(file, enc, cb) {
@@ -119,6 +126,8 @@ function zlanddoc(options) {
     var directoryPath = path.dirname(file.path);
     var directories = getDirectories(directoryPath);
     var files = getFiles(directoryPath);
+    var jsFiles = [];
+    var fileDescriptions = [];
 
     var directoryDescriptions = directories.map(function(subdir) {
       return {
@@ -128,17 +137,20 @@ function zlanddoc(options) {
       };
     });
 
-    var jsFiles = files.filter(function(file) {
-      return path.extname(file) in fileExtensionObjects;
-    });
+    if (buildFileDescriptions) {
+      jsFiles = files.filter(function(file) {
+        return path.extname(file) in fileExtensionObjects;
+      });
 
-    var fileDescriptions = jsFiles.map(function(file) {
-      return {
-        description: getFileDescription(path.join(directoryPath, file)),
-        text: file,
-        link: file + '.md'
-      };
-    });
+      fileDescriptions = jsFiles.map(function(file) {
+        var filePath = path.join(directoryPath, file);
+        return {
+          description: getFileDescription(filePath),
+          text: file,
+          link: fs.existsSync(filePath) ? file + '.md' : null
+        };
+      });
+    }
 
     var fileContent = filterGeneratedContent(file.contents.toString());
     if (fileContent.charAt(fileContent.length - 1) !== "\n") {

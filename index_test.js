@@ -87,7 +87,52 @@ var zlanddoc = proxyquire('./index.js', {
 
 describe('gulp-zlanddoc', function() {
 
+  beforeEach(function() {
+    readdirSyncCallCount = 0;
+  });
+
   it('add folder and file description to readme', function(done) {
+
+    // create the fake file
+    var fakeFile = new File({
+      path: 'filetest/path/README.md',
+      contents: new Buffer('abufferwiththiscontent')
+    });
+
+    // Create a zlanddoc plugin stream
+    var doc = zlanddoc({
+      buildFileDescriptions: true
+    });
+
+    // write the fake file to it
+    doc.write(fakeFile);
+
+    // wait for the file to come back out
+    doc.once('data', function(file) {
+      // make sure it came out the same way it went in
+      assert(file.isBuffer());
+
+      var content = file.contents.toString('utf8');
+
+      // check the contents
+      // for reparsing important comments
+      assert.notEqual(content.indexOf('<!-- start generated readme -->'), -1);
+      assert.notEqual(content.indexOf('<!-- end generated readme -->'), -1);
+      // files
+      assert.notEqual(content.indexOf('[testfolder1](testfolder1)'), -1);
+      assert.notEqual(content.indexOf('[testfolder2](testfolder2)'), -1);
+      // folders
+      assert.notEqual(content.indexOf('[testfile1.js](testfile1.js.md)'), -1);
+      assert.notEqual(content.indexOf('[testfile2.js](testfile2.js.md)'), -1);
+      // call count
+      assert.equal(readdirSyncCallCount, 2);
+      done();
+    });
+
+  });
+
+
+  it('add folder description only to readme', function(done) {
 
     // create the fake file
     var fakeFile = new File({
@@ -116,10 +161,8 @@ describe('gulp-zlanddoc', function() {
       assert.notEqual(content.indexOf('[testfolder1](testfolder1)'), -1);
       assert.notEqual(content.indexOf('[testfolder2](testfolder2)'), -1);
       // folders
-      assert.notEqual(content.indexOf('[testfile1.js](testfile1.js.md)'), -1);
-      assert.notEqual(content.indexOf('[testfile2.js](testfile2.js.md)'), -1);
-      // call count
-      assert.equal(readdirSyncCallCount, 2);
+      assert.equal(content.indexOf('[testfile1.js](testfile1.js.md)'), -1);
+      assert.equal(content.indexOf('[testfile2.js](testfile2.js.md)'), -1);
       done();
     });
 
