@@ -1,6 +1,6 @@
 {
   "name": "gulp-zlanddoc",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "attaches file and folder descriptions to readme.md",
   "keywords": [
     "gulpplugin"

@@ -26,7 +26,7 @@ var markdoxCustomFormatter = require('./lib/markdoxCustomFormatter');
 
 function getDirectories(srcpath) {
   return fs.readdirSync(srcpath).filter(function(file) {
-    if (file.indexOf('.') === 0) {
+    if (file.indexOf('.') === 0 || file.indexOf('node_modules') === 0) {
       return false;
     }
     return fs.statSync(path.join(srcpath, file)).isDirectory();
