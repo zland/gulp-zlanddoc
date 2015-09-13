@@ -20,6 +20,8 @@ var proxyquire = require('proxyquire');
 var assert = require('assert');
 var File = require('vinyl');
 var readdirSyncCallCount = 0;
+var fileExistsFunction = null;
+var fs = require('fs');
 
 var zlanddoc = proxyquire('./index.js', {
 
@@ -38,6 +40,9 @@ var zlanddoc = proxyquire('./index.js', {
     },
 
     existsSync: function() {
+      if (fileExistsFunction) {
+        return fileExistsFunction.apply(undefined, arguments);
+      }
       return true;
     },
 
@@ -48,6 +53,10 @@ var zlanddoc = proxyquire('./index.js', {
 
       if (file.indexOf(".js") !== -1) {
         return "some file content of " + file;
+      }
+
+      if (file.indexOf(".ejs") !== -1) {
+        return fs.readFileSync(file).toString();
       }
 
       throw new Error("unregistered readFileSync access");
@@ -89,6 +98,12 @@ describe('gulp-zlanddoc', function() {
 
   beforeEach(function() {
     readdirSyncCallCount = 0;
+    fileExistsFunction = null;
+  });
+
+  it('contains static variables', function() {
+    assert.notEqual(undefined, zlanddoc.markdoxCustomTemplate);
+    assert.notEqual(undefined, zlanddoc.markdoxCustomFormatter);
   });
 
   it('add folder and file description to readme', function(done) {
@@ -163,6 +178,47 @@ describe('gulp-zlanddoc', function() {
       // folders
       assert.equal(content.indexOf('[testfile1.js](testfile1.js.md)'), -1);
       assert.equal(content.indexOf('[testfile2.js](testfile2.js.md)'), -1);
+      done();
+    });
+
+  });
+
+  it("writes link to file if .md file does not exists", function(done) {
+    fileExistsFunction = function(file) {
+      return file.indexOf('.js.md') === -1;
+    };
+
+    // create the fake file
+    var fakeFile = new File({
+      path: 'filetest/path/README.md',
+      contents: new Buffer('abufferwiththiscontent')
+    });
+
+    // Create a zlanddoc plugin stream
+    var doc = zlanddoc({
+      buildFileDescriptions: true
+    });
+
+    // write the fake file to it
+    doc.write(fakeFile);
+
+    // wait for the file to come back out
+    doc.once('data', function(file) {
+      // make sure it came out the same way it went in
+      assert(file.isBuffer());
+
+      var content = file.contents.toString('utf8');
+
+      // check the contents
+      // for reparsing important comments
+      assert.notEqual(content.indexOf('<!-- start generated readme -->'), -1);
+      assert.notEqual(content.indexOf('<!-- end generated readme -->'), -1);
+      // files
+      assert.notEqual(content.indexOf('[testfolder1](testfolder1)'), -1);
+      assert.notEqual(content.indexOf('[testfolder2](testfolder2)'), -1);
+      // folders
+      assert.notEqual(content.indexOf('[testfile1.js](testfile1.js)'), -1);
+      assert.notEqual(content.indexOf('[testfile2.js](testfile2.js)'), -1);
       done();
     });
 

@@ -21,6 +21,8 @@ var path = require('path');
 var fs = require('fs');
 var dox = require('dox');
 var gutil = require('gulp-util');
+var markdoxCustomTemplate = fs.readFileSync(__dirname + '/lib/markdoxCustomTemplate.ejs');
+var markdoxCustomFormatter = require('./lib/markdoxCustomFormatter');
 
 function getDirectories(srcpath) {
   return fs.readdirSync(srcpath).filter(function(file) {
@@ -147,7 +149,7 @@ function zlanddoc(options) {
         return {
           description: getFileDescription(filePath),
           text: file,
-          link: fs.existsSync(filePath) ? file + '.md' : null
+          link: fs.existsSync(filePath + '.md') ? file + '.md' : file
         };
       });
     }
@@ -166,5 +168,8 @@ function zlanddoc(options) {
   });
 
 }
+
+zlanddoc.markdoxCustomTemplate = markdoxCustomTemplate;
+zlanddoc.markdoxCustomFormatter = markdoxCustomFormatter;
 
 module.exports = zlanddoc;
