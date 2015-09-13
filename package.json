@@ -8,7 +8,8 @@
   "author": "Florian Biewald <florian@zland.io>",
   "main": "./index.js",
   "files": [
-    "index.js"
+    "index.js",
+    "lib"
   ],
   "engines": {
     "node": ">=0.10.0",
