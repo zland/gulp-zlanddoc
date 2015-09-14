@@ -1,6 +1,8 @@
 # gulp-zlanddoc [![Build Status](https://travis-ci.org/zland/gulp-zlanddoc.svg)](https://travis-ci.org/zland/gulp-zlanddoc)  
 
-Build markdown docs for files and folders.
+Build markdown docs for files and folders.  
+The documentation for the plugin is created using gulp-zlanddoc.  
+Just take a look into gulpfile.js or continue reading Installation and Usage instructions.  
 
 ## Installation
 
