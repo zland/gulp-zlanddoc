@@ -16,7 +16,7 @@ This will append folder descripions to your readme files.
 var gulp = require('gulp');
 var zlanddoc = require('gulp-zlanddoc');
 
-gulp.task('create-docs', ['create-markdown-docs'], function() {
+gulp.task('create-docs', function() {
   // search for readme files and exclude certain folders
   return gulp.src([
     './**/README.md',
@@ -41,7 +41,10 @@ You should add a filedescription comment to each file:
 ```
 
 ```javascript
-gulp.task('create-docs', ['create-markdown-docs'], function() {
+var gulp = require('gulp');
+var zlanddoc = require('gulp-zlanddoc');
+
+gulp.task('create-docs', function() {
   // search for readme files and exclude certain folders
   return gulp.src([
     './**/README.md',
